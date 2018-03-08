@@ -1,0 +1,17 @@
+.idea
+*.class
+*.log
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+.history
+.cache
+.lib/
+
+# Ensime specific
+.ensime
+.ensime_cache/
+.ensime_lucene/
