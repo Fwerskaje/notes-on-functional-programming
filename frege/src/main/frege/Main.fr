@@ -1,4 +1,4 @@
-package HelloWorld where
+package Main where
 
 import Succ (scc, prd)
 
@@ -6,4 +6,5 @@ main :: [String] -> IO ()
 main _ = do println "Hello, world!"
             println $ show $ scc 42
             println $ show $ prd 42
+            
             
