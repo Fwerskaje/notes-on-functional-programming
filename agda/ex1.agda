@@ -40,6 +40,17 @@ zero ≡ suc y = false
 suc x ≡ zero = false
 suc x ≡ suc y = x ≡ y
 
+  zero ≥ zero = true
+  zero ≥ suc y = false
+  suc x ≥ zero = true
+  suc x ≥ suc y = x ≥ y
+
+  _≤_ : Nat → Nat → Bool
+  zero ≤ zero = true
+  zero ≤ suc y = true
+  suc x ≤ zero = false
+  suc x ≤ suc y = x ≤ y
+
 pred : Nat → Nat
 pred zero = zero
 pred (suc n) = n
@@ -259,7 +270,6 @@ lem-plus-zero (suc n) with n + zero | lem-plus-zero n
 ... | .n | refl = refl
 
 module M where
-
   data Maybé (A : Set) : Set where
     nothing : Maybé A
     just : A -> Maybé A
@@ -272,7 +282,6 @@ mapMaybe : {A B : Set} → (A → B) → M.Maybé A → M.Maybé B
 mapMaybe f m = let open M in maybe nothing (just ∘ f) m
   
 module Sort (A : Set) (_<_ : A → A → Bool) where
-
   insert : A → List A → List A
   insert y [] = y :: []
   insert y (x :: xs) with x < y
@@ -283,3 +292,82 @@ module Sort (A : Set) (_<_ : A → A → Bool) where
   sort [] = []
   sort (x :: xs) = insert x (sort xs)
 
+sort₁ : (A : Set) (_<_ : A → A → Bool) → List A → List A
+sort₁ = Sort.sort
+
+r₃ : List Nat
+r₃ = sort₁ Nat ℕ._≤_ (4 :: 2 :: 7 :: 2 :: 45 :: [])
+
+module M₁ where
+  module SortNat = Sort Nat ℕ._≤_
+
+  sort : List Nat → List Nat
+  sort = SortNat.sort
+
+module Lists (A : Set) (_<_ : A → A → Bool) where
+  open Sort A _<_ public
+
+  minimum : List A → Maybe A
+  minimum xs with sort xs
+  minimum xs | [] = Nothing
+  minimum xs | x :: b = Just x
+
+record Point : Set where
+  field x : Nat
+        y : Nat
+
+mkPoint : Nat → Nat → Point
+mkPoint z x = record { x = z ; y = x }
+
+p : Point
+p = mkPoint 3 4
+
+getX : Point → Nat
+getX = Point.x
+
+abs² : Point -> Nat
+abs² p = let open Point p in (x * x) + (y * y)
+
+record Monad (M : Set → Set) : Set₁ where
+  field return : {A : Set} → A → M A
+        _>>=_ : {A B : Set} → M A → (A → M B) → M B
+
+  mapM : {A B : Set} → (A → M B) → List A → M (List B)
+  mapM f [] = return []
+  mapM f (x :: xs) = f x >>= λ y →
+                     mapM f xs >>= λ ys →
+                     return (y :: ys)
+
+mapM′ : {M : Set → Set} → Monad M → {A B : Set} → (A → M B) → List A → M (List B)
+mapM′ Mon f xs = Monad.mapM Mon f xs
+
+vhead : {A : Set} {n : Nat} → (n ≠ zero) → Vec A n → A
+vhead s≠z (x :: xs) = x
+
+vfoldr : {A : Set} {n : Nat} → (f : A → A → A) → (init : A) → Vec A n → A
+vfoldr f init [] = init
+vfoldr f init (x :: xs) = f x (vfoldr f init xs)
+
+Matrix : Set → Nat → Nat → Set
+Matrix A n m = Vec (Vec A n) m
+
+m : Matrix Nat 3 3
+m = (1 :: 2 :: 3 :: []) ::
+    (4 :: 5 :: 6 :: []) ::
+    (7 :: 8 :: 9 :: []) :: []
+
+vec : {n : Nat} {A : Set} → A → Vec A n
+vec {zero} x = []
+vec {suc n} x = x :: vec x
+
+infixl 90 _$_
+_$_ : {n : Nat} {A B : Set} → Vec (A → B) n → Vec A n → Vec B n
+[] $ [] = []
+(f :: fs) $ (x :: xs) = f x :: fs $ xs
+
+transpose : ∀ {A n m} → Matrix A n m → Matrix A m n
+transpose [] = vec []
+transpose (m :: z) = {!!}
+
+lem-!-tab : ∀ {A n} (f : Fin n → A) (i : Fin n) → (tabulate f ! i) == f i
+lem-!-tab = {!!}
