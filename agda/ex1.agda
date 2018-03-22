@@ -40,6 +40,8 @@ zero ≡ suc y = false
 suc x ≡ zero = false
 suc x ≡ suc y = x ≡ y
 
+module ℕ where
+  _≥_ : Nat → Nat → Bool
   zero ≥ zero = true
   zero ≥ suc y = false
   suc x ≥ zero = true
