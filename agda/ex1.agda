@@ -84,6 +84,8 @@ data List (A : Set) : Set where
   [] : List A
   _::_ : A → List A → List A
 
+
+
 l : List Nat
 l = n₂ :: n₃ :: n₅ :: n₁₅ :: []
 

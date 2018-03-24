@@ -139,3 +139,20 @@ suc x × y = y + (x × y)
 ×comm : ∀ (x y : ℕ) → (x × y) ≡ (y × x)
 ×comm zero y rewrite ×0 y = refl
 ×comm (suc x) y rewrite ×suc y x | ×comm x y = refl
+
+×assoc : ∀ (x y z : ℕ) → (x × (y × z)) ≡ ((x × y) × z)
+×assoc zero y z = refl
+×assoc (suc x) y z rewrite ×assoc x y z | ×distribr y (x × y) z = refl
+
+_<_ : ℕ → ℕ → 𝔹
+zero < zero = ff
+zero < suc y = tt
+suc x < zero = ff
+suc x < suc y = x < y
+
+<-0 : ∀ (x : ℕ) → (x < 0) ≡ ff
+<-0 zero = refl
+<-0 (suc x) = refl
+
+id : {A : Set} → A → A
+id x = x
