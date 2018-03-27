@@ -33,4 +33,4 @@ instance Functor Pair where
   map f (Pair x y) = Pair (f x) (f y)
 
 instance Functor ((->) e) where
-  map g x = g . x
+  map = (.)
