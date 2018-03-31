@@ -5,8 +5,6 @@ module Applicative where
 
 import Functor
 import Pre
-import Data.Function ((.), ($), id, const)
-import Prelude (Int, (+))
 
 class Functor f => Applicative f where
   pure :: a -> f a

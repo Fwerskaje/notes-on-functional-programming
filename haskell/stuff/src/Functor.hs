@@ -3,7 +3,6 @@
 module Functor where
 
 import Pre
-import Data.Function (($), (.), const)
 
 class Functor f where 
   map :: (a -> b) -> f a -> f b
@@ -34,3 +33,6 @@ instance Functor Pair where
 
 instance Functor ((->) e) where
   map = (.)
+
+--instance Functor (Free f) where
+--  map

@@ -10,3 +10,4 @@ class Functor f => Monoidal f where
   (**) :: f a -> f b -> f (a, b)
 
 
+  
