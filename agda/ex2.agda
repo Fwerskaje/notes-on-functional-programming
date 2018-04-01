@@ -23,7 +23,7 @@ ff ∧ tt = ff
 ff ∧ ff = ff
 
 _∨_ : 𝔹 → 𝔹 → 𝔹
-tt ∨ b = tt
+tt ∨ b = tt 
 ff ∨ b = b
 
 ~_ : 𝔹 → 𝔹
@@ -32,6 +32,22 @@ ff ∨ b = b
 
 ~tt : (~ (~ tt)) ≡ tt
 ~tt = refl
+
+∧-commutative : ∀ (b c : 𝔹) -> (b ∧ c) ≡ (c ∧ b)
+∧-commutative tt tt = refl
+∧-commutative tt ff = refl
+∧-commutative ff tt = refl
+∧-commutative ff ff = refl
+
+∧-true-elim : ∀ (b c : 𝔹) → (b ∧ c) ≡ tt → c ≡ tt
+∧-true-elim tt c p = p -- Hm~
+∧-true-elim ff tt p = refl
+∧-true-elim ff ff ()
+
+∧-eq-∨ : ∀ (b c : 𝔹) -> (b ∧ c) ≡ (b ∨ c) → b ≡ c
+∧-eq-∨ tt .tt refl = refl
+∧-eq-∨ ff tt ()
+∧-eq-∨ ff ff refl = refl
 
 ~~-elim : ∀ (b : 𝔹) → (~ (~ b)) ≡ b
 ~~-elim tt = refl
