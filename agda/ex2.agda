@@ -45,7 +45,7 @@ ff ∨ b = b
 ∧-true-elim ff ff ()
 
 ∧-eq-∨ : ∀ (b c : 𝔹) -> (b ∧ c) ≡ (b ∨ c) → b ≡ c
-∧-eq-∨ tt .tt refl = refl
+∧-eq-∨ tt tt refl = refl
 ∧-eq-∨ ff tt ()
 ∧-eq-∨ ff ff refl = refl
 

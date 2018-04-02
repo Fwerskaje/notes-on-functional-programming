@@ -281,15 +281,18 @@ Proof.
 
 (* Ex *)
 Inductive bin : Type :=
-| BO : bin
-| BS : bin -> bin
-| BTwice : bin -> bin.
+| BO : bin (* 0 *)
+| BS : bin -> bin (* 1 + n *)
+| BTwice : bin -> bin. (* 2 × n *)
 
+(* 
+TODO
+Спорно. Надо переделать.
 Definition incr (n : bin) : bin :=
   match n with
-  | BO => BS BO
-  | (BS BO) => (BS (BS BO))
-  | (BS k) => BTwice k
+  | BO => BS BO (* 0 + 1 *)
+  | (BS BO) => (BS (BS BO)) (* ≠ 2 * 0, 1 + 1 + 0 *)
+  | (BS k) => BTwice k (* косяк *)
   | (BTwice k) => BS (BTwice k)
   end.
 
@@ -304,8 +307,10 @@ Compute (BTwice (BS (BTwice (BS BO)))).
 
 (* Test with zero *)
 
-Example test_bin_incr1 : bin_to_nat (incr (BTwice (BS (BTwice (BS BO))))) = 7.
+Example test_bin_incr1 :
+  bin_to_nat (incr (incr (BTwice (BTwice (BS BO))))) = 6.
 Proof.
+  simpl.
   reflexivity.
 Qed.
 
@@ -313,3 +318,4 @@ Example test_bin_incr2 : (incr (incr (incr (incr BO)))) = (BTwice ().
 Proof.
   reflexivity.
 Qed.
+*)
