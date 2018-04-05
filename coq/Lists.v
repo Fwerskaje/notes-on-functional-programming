@@ -364,10 +364,178 @@ Proof.
     reflexivity.
 Qed.
 
+(* TODO *) (*
 Lemma nonzeros_app : ∀ l1 l2 : natlist,
   nonzeros (l1 ++ l2) = (nonzeros l1) ++ (nonzeros l2).
+Proof. *)
+
+Fixpoint beq_natlist (l1 l2 : natlist) : bool :=
+  match l1 with
+  | nil =>
+    match l2 with
+    | nil => true
+    | _ => false
+    end
+  | (x :: xs) =>
+    match l2 with
+    | nil => false
+    | (y :: ys) =>
+      match beq_nat x y with
+      | true => beq_natlist xs ys
+      | false => false
+      end
+    end
+  end.
+
+Example test_beq_natlist1 :
+  (beq_natlist nil nil = true).
 Proof.
-  induction l1 as [|n l1' IHl1'].
+  reflexivity.
+Qed.
+
+Example test_beq_natlist2 :
+  beq_natlist [1;2;3] [1;2;3] = true.
+Proof.
+  reflexivity.
+Qed.
+
+Example test_beq_natlist3 :
+  beq_natlist [1;2;3] [1;2;4] = false.
+Proof.
+  reflexivity.
+Qed.
+
+Theorem beq_natlist_refl : ∀ l : natlist,
+  true = beq_natlist l l.
+Proof.
+  induction l as [|n l' IHl'].
   - reflexivity.
-  - intros l2.
-    
+  - simpl.
+    rewrite <- IHl'.
+    assert (H: beq_nat n n = true). {
+      induction n as [|n' IHn'].
+      + reflexivity.
+      + simpl.
+        rewrite -> IHn'.
+        reflexivity.
+    }
+    rewrite -> H.
+    reflexivity.
+Qed.
+
+(* Boring. *)
+
+(* Exercise: 4 stars, advanced (rev_injective) *)
+Theorem rev_inj : ∀ (l1 l2 : natlist), rev l1 = rev l2 → l1 = l2.
+Proof.
+  intros l1 l2 Eq.
+  assert (H: rev (rev l1) = l1). {
+    rewrite -> rev_involutive.
+    reflexivity.
+  }
+  rewrite <- H.
+  rewrite -> Eq.
+  rewrite -> rev_involutive.
+  reflexivity.
+Qed.  
+
+Inductive natoption : Type :=
+  | Some : nat → natoption
+  | None : natoption.
+
+Fixpoint nth_error (l:natlist) (n:nat) : natoption :=
+  match l with
+  | nil => None
+  | a :: l' => match beq_nat n O with
+               | true => Some a
+               | false => nth_error l' (pred n)
+               end
+  end.
+
+Example test_nth_error1 : nth_error [4;5;6;7] 0 = Some 4.
+Proof.
+  reflexivity.
+Qed.
+
+Example test_nth_error2 : nth_error [4;5;6;7] 3 = Some 7.
+Proof.
+  reflexivity.
+Qed.
+
+Example test_nth_error3 : nth_error [4;5;6;7] 9 = None.
+Proof.
+  reflexivity.
+Qed.
+
+Fixpoint nth_error' (l:natlist) (n:nat) : natoption :=
+  match l with
+  | nil => None
+  | a :: l' => if beq_nat n O then Some a
+               else nth_error' l' (pred n)
+  end.
+
+(* Exercise: 2 stars (hd_error) *)
+(* Boring *)
+
+Inductive id : Type :=
+| Id : nat → id.
+
+Definition beq_id (x1 x2 : id) :=
+  match x1, x2 with
+  | Id n1, Id n2 => beq_nat n1 n2
+  end.
+
+Theorem beq_id_refl : ∀ x, true = beq_id x x.
+Proof.
+  destruct x.
+  induction n as [|n' IHn'].
+  - reflexivity.
+  - rewrite -> IHn'.
+    reflexivity.
+Qed.
+
+End NatList.
+
+Module PartialMap.
+  
+  Export NatList.
+  
+  Inductive partial_map : Type :=
+  | empty : partial_map
+  | record : id → nat → partial_map → partial_map.
+
+  Definition update (d : partial_map) (x : id) (value : nat) : partial_map :=
+    record x value d.
+
+  Fixpoint find (x : id) (d : partial_map) : natoption :=
+    match d with
+    | empty => None
+    | record y v d' => if beq_id x y
+                      then Some v
+                      else find x d'
+    end.
+
+  Compute find (Id 2) (record (Id 1) 42 (record (Id 2) 16 empty)).
+
+Theorem update_eq :
+  ∀ (d : partial_map) (x : id) (v: nat),
+    find x (update d x v) = Some v.
+Proof.
+  intros d x v.
+  simpl.
+  rewrite <- beq_id_refl.
+  reflexivity.
+Qed.
+
+Theorem update_neq :
+  ∀ (d : partial_map) (x y : id) (o: nat),
+    beq_id x y = false → find x (update d y o) = find x d.
+Proof.
+  intros d x y o.
+  intros H.
+  simpl.
+  rewrite -> H.
+  reflexivity.
+Qed.
+
+End PartialMap.
