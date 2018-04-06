@@ -5,10 +5,6 @@ Require Import Basics.
 
 Module Lists.
 
-Inductive boollist : Type :=
-  | bool_nil : boollist
-  | bool_cons : bool → boollist → boollist.
-
 Inductive list (X : Type) : Type :=
 | nil : list X
 | cons : X → list X → list X.
@@ -16,6 +12,35 @@ Inductive list (X : Type) : Type :=
 Arguments nil {X}.
 
 Arguments cons {X} _ _.
+
+Fixpoint app {X : Type} (l1 l2 : list X) : (list X) :=
+  match l1 with
+  | nil => l2
+  | cons h t => cons h (app t l2)
+  end.
+
+Fixpoint rev {X : Type} (l : list X) : list X :=
+  match l with
+  | nil => nil
+  | cons h t => app (rev t) (cons h nil)
+  end.
+
+Fixpoint length {X : Type} (l : list X) : nat :=
+  match l with
+  | nil => 0
+  | cons _ l' => S (length l')
+  end.
+
+Example test_rev1 :
+  rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
+Proof. reflexivity. Qed.
+
+Example test_rev2:
+  rev (cons true nil) = cons true nil.
+Proof. reflexivity. Qed.
+
+Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
+Proof. reflexivity. Qed.
 
 Check (cons 1 (cons 2 (cons 3 nil))).
 
@@ -78,13 +103,13 @@ Fixpoint combine {X Y : Type} (xs : list X) (ys : list Y) : list (X * Y) :=
 
 Compute (combine [1;2] [false;false;true;true]).
 
-Fixpoint map (X Y : Type) (f : X → Y) (l : list X) : list Y :=
+Fixpoint map {X Y : Type} (f : X → Y) (l : list X) : list Y :=
   match l with
   | [] => []
-  | (x :: xs) => (f x) :: map X Y f xs
+  | (x :: xs) => (f x) :: map (*X Y*) f xs
   end.
 
-Arguments map {X} {Y} _ _.
+(*Arguments map {X} {Y} _ _.*)
 
 Inductive option (X : Type) : Type :=
   | Some : X → option X
@@ -165,3 +190,38 @@ Qed.
 
 Example test_map1: map (fun x => plus 3 x) [2;0;2] = [5;3;5].
 Proof. reflexivity. Qed.
+
+Definition id {X : Type} (x : X) := x.
+
+Theorem map_id : ∀ (X : Type) (l : list X),
+    map id l = l.
+Proof.
+  intros X l.
+  induction l as [|n l' IHl'].
+  - reflexivity.
+  - simpl.
+    rewrite -> IHl'.
+    reflexivity.
+Qed.
+
+Lemma distrib_map : ∀ (X Y : Type) (f : X → Y) (l : list X) (h : list X),
+  map f (l ++ h) = (map f l) ++ (map f h).
+  intros.
+  induction l.
+  reflexivity.
+  simpl.
+  rewrite <- IHl.
+  reflexivity.
+Qed.
+
+Theorem map_rev : ∀ (X Y : Type) (f : X → Y) (l : list X),
+  map f (rev l) = rev (map f l).
+Proof.
+  intros.
+  induction l.
+  - reflexivity.
+  - simpl.
+    rewrite <- IHl.
+    apply distrib_map.
+Qed.
+    
