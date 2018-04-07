@@ -3,8 +3,17 @@ Set Warnings "-notation-overridden,-parsing".
 Require Import Coq.Unicode.Utf8.
 Require Import Basics.
 
-Module Lists.
+(* TODO: why wasn't oddb imported with Basics moduel? *)
+Fixpoint evenb (n : nat) : bool :=
+  match n with
+  | O => true
+  | (S O) => false
+  | (S (S k)) => evenb k
+  end.
 
+Definition oddb (n : nat) : bool :=
+  negb (evenb n).
+  
 Inductive list (X : Type) : Type :=
 | nil : list X
 | cons : X → list X → list X.

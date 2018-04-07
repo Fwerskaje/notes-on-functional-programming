@@ -170,5 +170,88 @@ suc x < suc y = x < y
 <-0 zero = refl
 <-0 (suc x) = refl
 
+_=ℕ_ : ℕ → ℕ → 𝔹
+zero  =ℕ zero  = tt
+zero  =ℕ suc _ = ff
+suc _ =ℕ zero  = ff
+suc x =ℕ suc y = x =ℕ y
+
+_≤_ : ℕ → ℕ → 𝔹
+x ≤ y = (x < y) ∨ (x =ℕ y)
+
+≤-trans : ∀ {x y z : ℕ} → (x ≤ y) ≡ tt → (y ≤ z) ≡ tt → (x ≤ z) ≡ tt
+≤-trans {zero}  {zero}  {z}     refl prf₂ = prf₂
+≤-trans {zero}  {suc y} {zero}  refl _    = refl
+≤-trans {zero}  {suc y} {suc z} refl _    = refl
+≤-trans {suc x} {zero}  {zero}  () 
+≤-trans {suc x} {zero}  {suc z} () 
+≤-trans {suc x} {suc y} {zero}  _    prf₂ = prf₂
+≤-trans {suc x} {suc y} {suc z} prf₁ prf₂ rewrite ≤-trans {x} {y} {z} prf₁ prf₂ = refl
+
+≤-suc : ∀ (x : ℕ) → (x ≤ (suc x)) ≡ tt
+≤-suc zero = refl
+≤-suc (suc x) = ≤-suc x
+
 id : {A : Set} → A → A
 id x = x
+
+infixr 40 _∷_
+
+data 𝕃 {ℓ} (A : Set ℓ) : Set ℓ where
+  [] : 𝕃 A
+  _∷_ : (x : A) (xs : 𝕃 A) → 𝕃 A
+
+xs₁ : 𝕃 ℕ
+xs₁ = 1 ∷ 2 ∷ 3 ∷ 4 ∷ 5 ∷ []
+
+length : ∀ {ℓ} {A : Set ℓ} → 𝕃 A → ℕ
+length [] = zero
+length (_ ∷ xs) = 1 + length xs
+
+_++_ : ∀ {ℓ} {A : Set ℓ} → 𝕃 A → 𝕃 A → 𝕃 A
+[] ++ ys = ys
+(x ∷ xs) ++ ys = x ∷ (xs ++ ys)
+
+map : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′} → (A → B) → 𝕃 A → 𝕃 B
+map f [] = []
+map f (x ∷ xs) = f x ∷ map f xs
+
+filter : ∀ {ℓ} {A : Set ℓ} → (f : A → 𝔹) → 𝕃 A → 𝕃 A
+filter f [] = []
+filter f (x ∷ xs) =
+  if (f x) then x ∷ (filter f xs)
+  else filter f xs
+
+remove : ∀ {ℓ} {A : Set ℓ} (eq : A → A → 𝔹) (a : A) (xs : 𝕃 A) → 𝕃 A
+remove eq a = filter (eq a)
+
+data Maybe {ℓ} (A : Set ℓ) : Set ℓ where
+  Just : A → Maybe A
+  Nothing : Maybe A
+
+nth : ∀ {ℓ} {A : Set ℓ} → ℕ → 𝕃 A → Maybe A
+nth n [] = Nothing
+nth zero (x ∷ xs) = Just x
+nth (suc n) (x ∷ xs) = nth n xs
+
+reverse : ∀ {ℓ} {A : Set ℓ} → 𝕃 A → 𝕃 A
+reverse xs = reverse-helper [] xs
+  where reverse-helper : ∀ {ℓ} {A : Set ℓ} → 𝕃 A → 𝕃 A → 𝕃 A
+        reverse-helper h [] = h
+        reverse-helper h (x ∷ xs) = reverse-helper (x ∷ h) xs
+
+length-++ : ∀ {ℓ} {A : Set ℓ} (l₁ l₂ : 𝕃 A) → (length (l₁ ++ l₂)) ≡ ((length l₁) + (length l₂))
+length-++ [] l₂ = refl
+length-++ (x ∷ l₁) l₂ rewrite length-++ l₁ l₂ = refl
+
+++-assoc : ∀ {ℓ} {A : Set ℓ} (l₁ l₂ l₃ : 𝕃 A) → ((l₁ ++ l₂) ++ l₃) ≡ (l₁ ++ (l₂ ++ l₃))
+++-assoc [] l₂ l₃ = refl
+++-assoc (x ∷ l₁) l₂ l₃ rewrite ++-assoc l₁ l₂ l₃ = refl
+
+length-filter : ∀ {ℓ} {A : Set ℓ} (p : A → 𝔹) (l : 𝕃 A) → ((length (filter p l)) ≤ (length l)) ≡ tt
+length-filter p [] = refl
+length-filter p (x ∷ xs) with p x 
+… | tt = length-filter p xs
+… | ff =
+  ≤-trans {length (filter p xs)} (length-filter p xs) (≤-suc (length xs))
+
