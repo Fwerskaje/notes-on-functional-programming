@@ -113,6 +113,10 @@ _+_ : ℕ → ℕ → ℕ
 zero + y = y
 suc x + y = suc (x + y)
 
+pred : ℕ → ℕ
+pred zero = zero
+pred (suc n) = n
+
 0+ : ∀ (x : ℕ) → (0 + x) ≡ x
 0+ x = refl
 
