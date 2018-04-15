@@ -25,8 +25,6 @@ data Nat : Set where
   zero : Nat
   suc : Nat → Nat
 
-{-# BUILTIN NATURAL Nat #-}
-
 _+_ : Nat → Nat → Nat
 zero + y = y
 suc x + y = suc (x + y)
@@ -300,8 +298,8 @@ module Sort (A : Set) (_<_ : A → A → Bool) where
 sort₁ : (A : Set) (_<_ : A → A → Bool) → List A → List A
 sort₁ = Sort.sort
 
-r₃ : List Nat
-r₃ = sort₁ Nat ℕ._≤_ (4 :: 2 :: 7 :: 2 :: 45 :: [])
+--r₃ : List Nat
+--r₃ = sort₁ Nat ℕ._≤_ (4 :: 2 :: 7 :: 2 :: 45 :: [])
 
 module M₁ where
   module SortNat = Sort Nat ℕ._≤_

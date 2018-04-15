@@ -94,3 +94,6 @@ lia.cache
 nia.cache
 nlia.cache
 nra.cache
+
+*.beam
+output

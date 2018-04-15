@@ -140,6 +140,10 @@ _×_ : ℕ → ℕ → ℕ
 zero × y = 0
 suc x × y = y + (x × y)
 
+iszero : (n : ℕ) → 𝔹
+iszero zero = tt
+iszero (suc _) = ff
+
 ×distribr : ∀ (x y z : ℕ) → ((x + y) × z) ≡ ((x × z) + (y × z))
 ×distribr zero y z = refl
 ×distribr (suc x) y z rewrite ×distribr x y z = +assoc z (x × z) (y × z)
