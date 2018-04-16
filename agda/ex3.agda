@@ -96,8 +96,10 @@ data Stream {ℓ} (α : Set ℓ) : Set ℓ where
 s₁ : Stream ℕ 
 s₁ = σ zero suc
 
+{-
 mapStream : {α β : Set} → (f : α → β) → Stream α → Stream β
-mapStream f (σ x succ) = ?
+mapStream f (σ x succ) = {!!}
+-}
 
 take : ∀ {ℓ} {α : Set ℓ} → (i : ℕ) → Stream α → 𝕍 α i
 take zero _ = []

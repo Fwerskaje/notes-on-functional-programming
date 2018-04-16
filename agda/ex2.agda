@@ -124,10 +124,6 @@ pred (suc n) = n
 +0 zero = refl
 +0 (suc x) rewrite +0 x = refl
 
-+assoc : ∀ (x y z : ℕ) → (x + (y + z)) ≡ ((x + y) + z)
-+assoc zero y z = refl
-+assoc (suc x) y z rewrite +assoc x y z = refl
-
 +suc : ∀ (x y : ℕ) → (x + suc y) ≡ suc (x + y)
 +suc zero y = refl
 +suc (suc x) y rewrite +suc x y = refl
@@ -143,6 +139,10 @@ suc x × y = y + (x × y)
 iszero : (n : ℕ) → 𝔹
 iszero zero = tt
 iszero (suc _) = ff
+
++assoc : ∀ (x y z : ℕ) → (x + (y + z)) ≡ ((x + y) + z)
++assoc zero y z = refl
++assoc (suc x) y z rewrite +assoc x y z = refl
 
 ×distribr : ∀ (x y z : ℕ) → ((x + y) × z) ≡ ((x × z) + (y × z))
 ×distribr zero y z = refl
@@ -168,6 +168,29 @@ iszero (suc _) = ff
 ×assoc zero y z = refl
 ×assoc (suc x) y z rewrite ×assoc x y z | ×distribr y (x × y) z = refl
 
+_^_ : ℕ → ℕ → ℕ
+zero  ^ _    = 0
+suc _ ^ zero = 1
+x′@(suc x) ^ suc y = x′ × (x′ ^ y)
+
+x¹ : ℕ
+x¹ = 3 ^ 5 -- 243
+
+{-
+
+def func(a, b, ans=0):
+    if a/b == 1:
+        return ans + 1
+    else: return func(a/b, b, ans+1)
+
+-}
+
+{-
+log : ℕ → ℕ → ℕ
+log = ?
+  where go : ℕ → ℕ → ℕ → ℕ
+        go a b ans-}
+
 _<_ : ℕ → ℕ → 𝔹
 zero < zero = ff
 zero < suc y = tt
@@ -184,8 +207,42 @@ zero  =ℕ suc _ = ff
 suc _ =ℕ zero  = ff
 suc x =ℕ suc y = x =ℕ y
 
+_≠ℕ_ : ℕ → ℕ → 𝔹
+x ≠ℕ y = ~ (x =ℕ y)
+
 _≤_ : ℕ → ℕ → 𝔹
 x ≤ y = (x < y) ∨ (x =ℕ y)
+
+prf≤¹ : ∀ (x y : ℕ) → (suc x ≤ suc y) ≡ tt → (x ≤ suc y) ≡ tt
+prf≤¹ zero zero refl = refl
+prf≤¹ zero (suc y) refl = refl
+prf≤¹ (suc x) zero ()
+prf≤¹ (suc x) (suc y) p rewrite prf≤¹ x y p = refl
+
+_-_「_」 : (x : ℕ) → (y : ℕ) → (y ≤ x) ≡ tt → ℕ
+zero       - zero  「 refl 」 = zero
+zero       - suc _ 「 () 」
+x@(suc _)  - zero  「 refl 」 = x
+suc x      - suc y 「 p 」 = x - y 「 p 」
+
+x₃ : (43 - 17 「 refl 」) ≡ 26
+x₃ = refl
+
+div : (x : ℕ) → (y : ℕ) → (0 ≠ℕ y) ≡ tt → ℕ
+div zero    zero ()
+div (suc _) zero () 
+div zero    (suc _) refl = 0
+div d@(suc x) n@(suc y) p = go d n p
+  where go : (d : ℕ) → (n : ℕ) → (0 ≠ℕ n) ≡ tt → ℕ
+        go d zero ()
+        go d (suc zero) refl = d
+        go d n@(suc (suc _)) refl with d ≤ n
+        … | tt = go d (n - d 「 {!!} 」) {!!}
+        … | ff = n
+
+{-
+x² : ℕ
+x² = div 56 4 refl-}
 
 ≤-trans : ∀ {x y z : ℕ} → (x ≤ y) ≡ tt → (y ≤ z) ≡ tt → (x ≤ z) ≡ tt
 ≤-trans {zero}  {zero}  {z}     refl prf₂ = prf₂

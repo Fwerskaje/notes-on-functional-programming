@@ -19,3 +19,4 @@ data Vec :: Type -> Nat -> Type where
 zip :: Vec a n -> Vec b n -> Vec (a, b) n
 zip Nil Nil = Nil
 zip (x :> xs) (y :> ys) = (x, y) :> zip xs ys
+
