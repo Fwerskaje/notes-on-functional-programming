@@ -191,6 +191,15 @@ log = ?
   where go : ℕ → ℕ → ℕ → ℕ
         go a b ans-}
 
+data Either : (α β : Set) → Set where
+  Left  : {α β : Set} → (a : α) → Either α β
+  Right : {α β : Set} → (b : β) → Either α β
+
+data Either³ : (α β γ : Set) → Set where
+  Left   : {α β γ : Set} → (a : α) → Either³ α β γ
+  Middle : {α β γ : Set} → (b : β) → Either³ α β γ
+  Right  : {α β γ : Set} → (c : γ) → Either³ α β γ
+
 _<_ : ℕ → ℕ → 𝔹
 zero < zero = ff
 zero < suc y = tt
@@ -210,8 +219,35 @@ suc x =ℕ suc y = x =ℕ y
 _≠ℕ_ : ℕ → ℕ → 𝔹
 x ≠ℕ y = ~ (x =ℕ y)
 
+_>_ : ℕ → ℕ → 𝔹
+x > y = (~ (x < y)) ∧ (x ≠ℕ y)
+
+<⇒> : ∀ (x y : ℕ) → (x < y) ≡ tt → (y > x) ≡ tt
+<⇒> zero zero ()
+<⇒> zero (suc y) refl = refl
+<⇒> (suc x) zero ()
+<⇒> (suc x) (suc y) p rewrite <⇒> x y p = refl
+
 _≤_ : ℕ → ℕ → 𝔹
 x ≤ y = (x < y) ∨ (x =ℕ y)
+
+_≥_ : ℕ → ℕ → 𝔹
+x ≥ y = (x > y) ∨ (x =ℕ y)
+
+zeroXzeroY : ∀ (x y : ℕ) → (x =ℕ 0) ≡ tt → (x =ℕ y) ≡ tt → (y =ℕ 0) ≡ tt
+zeroXzeroY zero    zero    prf₁ prf₂ = refl
+zeroXzeroY zero    (suc _) refl ()
+zeroXzeroY (suc x) zero    ()   _
+zeroXzeroY (suc x) (suc y) ()   _
+
+ℕComp : (x : ℕ) → (y : ℕ) → Set
+ℕComp x y = Either³ ((x > y) ≡ tt) ((x =ℕ y) ≡ tt) ((x < y) ≡ tt)
+
+compareℕ : (x : ℕ) → (y : ℕ) → ℕComp x y
+compareℕ zero zero = Middle refl
+compareℕ zero (suc _) = Right refl
+compareℕ (suc _) zero = Left refl
+compareℕ (suc x) (suc y) = compareℕ x y 
 
 prf≤¹ : ∀ (x y : ℕ) → (suc x ≤ suc y) ≡ tt → (x ≤ suc y) ≡ tt
 prf≤¹ zero zero refl = refl
@@ -219,7 +255,7 @@ prf≤¹ zero (suc y) refl = refl
 prf≤¹ (suc x) zero ()
 prf≤¹ (suc x) (suc y) p rewrite prf≤¹ x y p = refl
 
-_-_「_」 : (x : ℕ) → (y : ℕ) → (y ≤ x) ≡ tt → ℕ
+_-_「_」 : (x : ℕ) → (y : ℕ) → (x ≥ y) ≡ tt → ℕ
 zero       - zero  「 refl 」 = zero
 zero       - suc _ 「 () 」
 x@(suc _)  - zero  「 refl 」 = x
@@ -228,21 +264,126 @@ suc x      - suc y 「 p 」 = x - y 「 p 」
 x₃ : (43 - 17 「 refl 」) ≡ 26
 x₃ = refl
 
+minus : ℕ → ℕ → ℕ
+minus zero y = 0
+minus x@(suc _) zero = x
+minus (suc x) (suc y) = minus x y 
+
+{-
+division :: Int -> Int -> Int
+division = go 0
+  where go acc n d
+          | n >= d = go (acc + 1) (n - d) d
+          | otherwise = acc
+-}
+
+≥⇒≤ : ∀ (x y : ℕ) → (x ≥ y) ≡ tt → (y ≤ x) ≡ tt
+≥⇒≤ zero zero refl = refl
+≥⇒≤ zero (suc _) ()
+≥⇒≤ (suc x) zero refl = refl
+≥⇒≤ (suc x) (suc y) p rewrite ≥⇒≤ x y p = refl
+
+∀ℕ⇒ℕ≥0 : ∀ (n : ℕ) → (n ≥ 0) ≡ tt
+∀ℕ⇒ℕ≥0 zero    = refl
+∀ℕ⇒ℕ≥0 (suc _) = refl 
+
+x-eq-x : ∀ (x : ℕ) → (x =ℕ x) ≡ tt
+x-eq-x zero    = refl
+x-eq-x (suc x) = x-eq-x x
+
+xMinusZero : ∀ (x : ℕ) → ((x - 0 「 ∀ℕ⇒ℕ≥0 x 」) =ℕ x) ≡ tt
+xMinusZero zero    = refl
+xMinusZero (suc x) = x-eq-x x
+
+minusXprf : ∀ (x y : ℕ) →
+              (prf : (x ≥ y) ≡ tt) →
+              ((x ≠ℕ 0) ∧ (y ≠ℕ 0)) ≡ tt →
+              (x > (x - y 「 prf 」)) ≡ tt
+minusXprf zero zero refl ()
+minusXprf zero (suc y) () ()
+minusXprf (suc x) zero refl ()
+minusXprf (suc x) (suc y) p1 p2 = {!!}
+
+minusXYprf : ∀ (d n : ℕ) → (d > n) ≡ tt → (d > minus n d) ≡ tt
+minusXYprf zero zero ()
+minusXYprf zero (suc _) ()
+minusXYprf (suc _) zero refl = refl
+minusXYprf (suc d) (suc n) prf {- rewrite minusXYprf d n prf -} = {!!}
+
+{-
+
+-- it works
+division : (x : ℕ) → (y : ℕ) → (y ≠ℕ 0) ≡ tt → ℕComp x y → ℕ
+division zero zero () _
+division zero (suc _) refl (Left ())
+division zero (suc _) refl (Middle ())
+division zero (suc _) refl (Right refl) = 0
+division (suc _) zero () _
+division (suc x) (suc y) refl (Middle prf) = 1
+division (suc x) (suc y) refl (Right prf) = 0
+division d@(suc x) n@(suc y) refl (Left prf₁) = go d n 0 d
+  where go : (d : ℕ) → (n : ℕ) → (acc : ℕ) → (count : ℕ) → ℕ
+        go d n acc zero = 42 -- acc Never happend? TODO
+        go d n acc (suc count) with n ≤ d -- 42 ≥ 2
+        go d n acc (suc count) | tt = go (minus d n) n (suc acc) count
+        go d n acc (suc count) | ff = acc
+-}
+
+x>y⇒x≥y : ∀ (x y : ℕ) → (x > y) ≡ tt → (x ≥ y) ≡ tt
+x>y⇒x≥y zero zero ()
+x>y⇒x≥y zero (suc y) ()
+x>y⇒x≥y (suc x) zero refl = refl
+x>y⇒x≥y (suc x) (suc y) p = x>y⇒x≥y x y p
+
+division : (x : ℕ) → (y : ℕ) → (y ≠ℕ 0) ≡ tt → ℕComp x y → ℕ
+division zero    zero () _
+division (suc _) zero () _
+division zero    (suc _) refl (Left ())
+division zero    (suc _) refl (Middle ())
+division zero    (suc _) refl (Right refl) = 0
+division (suc _) (suc _) refl (Middle _)   = 1
+division (suc _) (suc _) refl (Right  _)   = 0
+division d@(suc x) n@(suc y) refl (Left prf) = go d n prf 0 d
+  where go : (d : ℕ) → (n : ℕ) → (d > n) ≡ tt → (acc : ℕ) → (count : ℕ) → ℕ
+        go d n p acc zero = acc -- TODO
+        go d n p acc (suc count) with compareℕ n d -- n ≤ d
+        go d n p acc (suc count) | Left _ = acc -- n > d
+        go d n p acc (suc count) | Middle b = go (d - n 「 x>y⇒x≥y d n p 」) n {!!} (suc acc) count -- n=d
+        go d n p acc (suc count) | Right c = {!!} -- n < d
+{-
+        go d n p acc (suc count) | tt = go (d - n 「 x>y⇒x≥y d n p 」) n {!!} (suc acc) count
+        go d n p acc (suc count) | ff = acc-}
+
+n₁ : ((division 42 2 refl (Left refl)) =ℕ 21) ≡ tt
+n₁ = {!!} -- refl
+
+{-
+division _ zero ()
+division zero (suc _) refl = zero
+division (suc x) (suc y) refl = {!!}
+  where go : (acc : ℕ) → ℕ → ℕ → ℕ
+        go acc n d with (d ≤ n)
+        go acc n d | tt = go (acc + 1) (minus n d) d
+        go acc n d | ff = acc
+-}
+{-
+-- doesn't work
 div : (x : ℕ) → (y : ℕ) → (0 ≠ℕ y) ≡ tt → ℕ
 div zero    zero ()
 div (suc _) zero () 
 div zero    (suc _) refl = 0
-div d@(suc x) n@(suc y) p = go d n p
-  where go : (d : ℕ) → (n : ℕ) → (0 ≠ℕ n) ≡ tt → ℕ
-        go d zero ()
-        go d (suc zero) refl = d
-        go d n@(suc (suc _)) refl with d ≤ n
-        … | tt = go d (n - d 「 {!!} 」) {!!}
-        … | ff = n
+div d@(suc _) n@(suc _) refl = go d n n
+  where go : (d : ℕ) → (n : ℕ) → (count : ℕ) {-→ (0 ≠ℕ n) ≡ tt -} → ℕ
+        go d n count with d ≤ n
+        go d n zero        | tt = 0
+        go d n (suc count) | tt = go (minus n d) n count
+        go d n count       | ff = n-}
+        
+-- div 3 1
+-- go 3 1 1
+-- go (1 - 3 = 0) 3 0
+-- 0
 
-{-
-x² : ℕ
-x² = div 56 4 refl-}
 
 ≤-trans : ∀ {x y z : ℕ} → (x ≤ y) ≡ tt → (y ≤ z) ≡ tt → (x ≤ z) ≡ tt
 ≤-trans {zero}  {zero}  {z}     refl prf₂ = prf₂
