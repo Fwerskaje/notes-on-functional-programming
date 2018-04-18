@@ -13,6 +13,12 @@ data 𝔹 : Set where
 {-# BUILTIN TRUE  tt  #-}
 {-# BUILTIN FALSE ff #-}
 
+_=𝔹_ : 𝔹 → 𝔹 → 𝔹
+tt =𝔹 tt = tt
+tt =𝔹 ff = ff
+ff =𝔹 tt = ff
+ff =𝔹 ff = tt
+
 if_then_else_ : ∀ {ℓ} {A : Set ℓ} → 𝔹 → A → A → A
 if tt then y else z = y
 if ff then y else z = z
@@ -176,21 +182,6 @@ x′@(suc x) ^ suc y = x′ × (x′ ^ y)
 x¹ : ℕ
 x¹ = 3 ^ 5 -- 243
 
-{-
-
-def func(a, b, ans=0):
-    if a/b == 1:
-        return ans + 1
-    else: return func(a/b, b, ans+1)
-
--}
-
-{-
-log : ℕ → ℕ → ℕ
-log = ?
-  where go : ℕ → ℕ → ℕ → ℕ
-        go a b ans-}
-
 data Either : (α β : Set) → Set where
   Left  : {α β : Set} → (a : α) → Either α β
   Right : {α β : Set} → (b : β) → Either α β
@@ -222,11 +213,11 @@ x ≠ℕ y = ~ (x =ℕ y)
 _>_ : ℕ → ℕ → 𝔹
 x > y = (~ (x < y)) ∧ (x ≠ℕ y)
 
-<⇒> : ∀ (x y : ℕ) → (x < y) ≡ tt → (y > x) ≡ tt
-<⇒> zero zero ()
-<⇒> zero (suc y) refl = refl
-<⇒> (suc x) zero ()
-<⇒> (suc x) (suc y) p rewrite <⇒> x y p = refl
+<⇒> : ∀ (x y : ℕ) → (x > y) ≡ (y < x)
+<⇒> zero zero = refl
+<⇒> zero (suc y) = refl
+<⇒> (suc x) zero = refl
+<⇒> (suc x) (suc y) = <⇒> x y
 
 _≤_ : ℕ → ℕ → 𝔹
 x ≤ y = (x < y) ∨ (x =ℕ y)
@@ -335,6 +326,13 @@ x>y⇒x≥y zero (suc y) ()
 x>y⇒x≥y (suc x) zero refl = refl
 x>y⇒x≥y (suc x) (suc y) p = x>y⇒x≥y x y p
 
+dn-eq-dn-beq : ∀ (d n : ℕ) → (d =ℕ n) ≡ tt → (d ≥ n) ≡ tt
+dn-eq-dn-beq zero zero refl = refl
+dn-eq-dn-beq zero (suc n) ()
+dn-eq-dn-beq (suc d) zero ()
+dn-eq-dn-beq (suc d) (suc n) p = dn-eq-dn-beq d n p
+
+{-
 division : (x : ℕ) → (y : ℕ) → (y ≠ℕ 0) ≡ tt → ℕComp x y → ℕ
 division zero    zero () _
 division (suc _) zero () _
@@ -343,18 +341,68 @@ division zero    (suc _) refl (Middle ())
 division zero    (suc _) refl (Right refl) = 0
 division (suc _) (suc _) refl (Middle _)   = 1
 division (suc _) (suc _) refl (Right  _)   = 0
-division d@(suc x) n@(suc y) refl (Left prf) = go d n prf 0 d
-  where go : (d : ℕ) → (n : ℕ) → (d > n) ≡ tt → (acc : ℕ) → (count : ℕ) → ℕ
-        go d n p acc zero = acc -- TODO
-        go d n p acc (suc count) with compareℕ n d -- n ≤ d
-        go d n p acc (suc count) | Left _ = acc -- n > d
-        go d n p acc (suc count) | Middle b = go (d - n 「 x>y⇒x≥y d n p 」) n {!!} (suc acc) count -- n=d
-        go d n p acc (suc count) | Right c = {!!} -- n < d
-{-
-        go d n p acc (suc count) | tt = go (d - n 「 x>y⇒x≥y d n p 」) n {!!} (suc acc) count
-        go d n p acc (suc count) | ff = acc-}
+division d′@(suc x) n′@(suc y) refl (Left prf) = go d′ n′ (Left prf) 0 d′
+  where go : (d : ℕ) → (n : ℕ) → ℕComp d n {-(n < d) ≡ tt-} → (acc : ℕ) → (count : ℕ) → ℕ
+        go zero zero (Left ()) acc count
+        go zero zero (Middle refl) acc count = {!!} -- hm~
+        go zero zero (Right ()) acc count
+        go zero (suc n) (Left ()) acc count
+        go zero (suc n) (Middle ()) acc count
+        go zero (suc n) (Right refl) acc count = acc -- d < n ⇒ n > d
+        go (suc d) zero (Left refl) acc count = go d 0 (compareℕ d 0) (suc acc) count -- d > n ⇒ n < d
+        go (suc d) zero (Middle ()) acc count
+        go (suc d) zero (Right ()) acc count
+        go (suc d) (suc n) (Left a) acc count = go d″ n (compareℕ d″ n) (suc acc) count
+          where d″ = (d - n 「 x>y⇒x≥y d n a 」) -- d > n ⇒ n < d
+        go (suc d) (suc n) (Middle b) acc count = go d″ n (compareℕ d″ n) (suc acc) count
+          where d″ = (d - n 「 dn-eq-dn-beq d n b 」) -- WOW, IT'S ZERO!
+        go (suc d) (suc n) (Right c) acc count = acc -- d < n ⇒ n > d-}
 
-n₁ : ((division 42 2 refl (Left refl)) =ℕ 21) ≡ tt
+ℕComp² : (x y : ℕ) → Set
+ℕComp² x y = Either ((x ≥ y) ≡ tt) ((x ≤ y) ≡ tt)
+
+compareℕ₂ : (x y : ℕ) → ℕComp² x y
+compareℕ₂ zero zero = Left refl
+compareℕ₂ zero (suc y) = Right refl
+compareℕ₂ (suc x) zero = Left refl
+compareℕ₂ (suc x) (suc y) = compareℕ₂ x y
+
+{-
+division : (x : ℕ) → (y : ℕ) → (y ≠ℕ 0) ≡ tt → ℕComp x y → ℕ
+division zero    zero () _
+division (suc _) zero () _
+division zero    (suc _) refl (Left ())
+division zero    (suc _) refl (Middle ())
+division zero    (suc _) refl (Right refl) = 0
+division (suc _) (suc _) refl (Middle _)   = 1
+division (suc _) (suc _) refl (Right  _)   = 0
+division n′@(suc x) d′@(suc y) refl (Left prf) = go n′ d′ (compareℕ₂ n′ d′) refl 0 n′ -- d ≤ n
+  where go : (n : ℕ) → (d : ℕ) → ℕComp² n d → (d ≠ℕ 0) ≡ tt → (acc : ℕ) → (count : ℕ) → ℕ
+        go zero zero p1 () acc count
+        go (suc n) zero p1 () acc count
+        go zero (suc d) (Left ()) refl acc count
+        go zero (suc d) (Right refl) refl acc count = acc
+        go (suc n) (suc d) (Left a) refl acc zero = {!!}
+        go (suc n) (suc d) (Right b) refl acc count = acc
+        go (suc n) d″@(suc d) (Left a) refl acc (suc count) =
+          go n″ d″ (compareℕ₂ n″ d″) refl (suc acc) count
+            where n″ = (n - d 「 a 」) -}
+
+division : (x : ℕ) → (y : ℕ) → (y ≠ℕ 0) ≡ tt → ℕ
+division _ zero ()
+division zero (suc _) _ = 0
+division n′@(suc x) d′@(suc y) refl = go n′ d′ 0 n′ (compareℕ₂ x y) refl refl -- d ≤ n
+  where go : (n : ℕ) → (d : ℕ) → (acc : ℕ) → (count : ℕ) → ℕComp² n d → (count ≠ℕ 0) ≡ tt → (d ≠ℕ 0) ≡ tt → ℕ
+        go n zero acc count p1 p2 ()
+        go n (suc d) acc zero p1 () p3
+        go zero (suc d) acc (suc count) (Left ()) p2 p3
+        go zero (suc d) acc (suc count) (Right b) p2 p3 = acc
+        go (suc n) (suc d) acc (suc count) (Right b) p2 p3 = acc
+        go (suc n) d″@(suc d) acc (suc count) (Left a) p2 p3 =
+          go n″ d″ (suc acc) count (compareℕ₂ n″ d″) {!!} refl
+             where n″ = (n - d 「 a 」)
+
+n₁ : ((division 42 2 refl ) =ℕ 21) ≡ tt
 n₁ = {!!} -- refl
 
 {-
