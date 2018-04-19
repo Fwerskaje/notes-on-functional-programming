@@ -1,4 +1,4 @@
-module Ex1 where
+module ex1 where
 
 data Bool : Set where
   true : Bool
