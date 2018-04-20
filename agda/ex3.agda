@@ -139,31 +139,23 @@ data ℤ : Set where
 -1ℤ : ℤ
 -1ℤ = Mkℤ 1 ff
 
-minus>zero : ∀ (x y : ℕ) → (p : ((x > y) ≡ tt)) → ((x - y 「 x>y⇒x≥y x y p 」) > 0) ≡ tt
-minus>zero zero zero ()
-minus>zero zero (suc _) ()
-minus>zero (suc x) zero refl = refl
-minus>zero (suc x) (suc y) p rewrite minus>zero x y p = refl
-
-ℤ-pos-t->-0 : ∀ (n : ℕ) (p : (n > 0) ≡ tt) → (ℤ-pos-t n) ≡ 𝔹
-ℤ-pos-t->-0 zero ()
-ℤ-pos-t->-0 (suc n) refl = refl
-
-
---minusℤ-pos-t : ∀ (n : ℕ) (x : (ℤ-pos-t n)) → (p : (n > 0) ≡ tt) → (the 𝔹 x)
---minusℤ-pos-t zero _ ()
---minusℤ-pos-t (suc n) x refl = x
+z-pos : ∀ (x y : ℕ) (a : (x > y)  ≡ tt) (b : 𝔹) → ℤ-pos-t (x - y 「 x>y⇒x≥y x y a 」)
+z-pos zero zero () _
+z-pos zero (suc y) () _
+z-pos (suc x) zero refl b = b 
+z-pos (suc x) (suc y) a b = z-pos x y a b
 
 _+ℤ_ : ℤ → ℤ → ℤ
 Mkℤ zero _      +ℤ y            = y
 Mkℤ n@(suc _) x +ℤ Mkℤ zero _   = Mkℤ n x
 Mkℤ n@(suc _) x +ℤ Mkℤ n₂@(suc _) x₁ with < compareℕ n n₂ , x ⊻ x₁ >
 … | < _  , ff > = Mkℤ (n + n₂) x
-Mkℤ n@(suc n′) x +ℤ Mkℤ n₂@(suc n′₂) x₁ | < Left a , tt > =
-  let n″   = n - n₂ 「 x>y⇒x≥y n′ n′₂ a 」
-      n″>0 = minus>zero n n₂ a
-      n″-𝔹 = ℤ-pos-t->-0 n″ n″>0 in Mkℤ n″ ?
-        
-Mkℤ (suc _) x +ℤ Mkℤ (suc _) x₁ | < Middle b , tt > = {!!}
-Mkℤ (suc _) x +ℤ Mkℤ (suc _) x₁ | < Right c , tt > = {!!}
+Mkℤ n@(suc n′) x +ℤ Mkℤ n₂@(suc n′₂) x₁ | < Left a , tt > = Mkℤ n″ (z-pos n′ n′₂ a x)
+  where n″ = n - n₂ 「 x>y⇒x≥y n′ n′₂ a 」
+Mkℤ (suc _) _ +ℤ Mkℤ (suc _) _  | < Middle b , tt > = Mkℤ zero triv
+Mkℤ n@(suc n′) x +ℤ Mkℤ n₂@(suc n′₂) x₁ | < Right c , tt > = Mkℤ n″ {!!} --(z-pos n′ n′₂ a x)
+  where n″ = n₂ - n 「 x>y⇒x≥y n′₂ n′ {!!} 」
 
+-- c   : (n′ < n′₂) ≡ tt
+
+-- (x y : ℕ) → (x > y) ≡ (y < x)

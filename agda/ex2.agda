@@ -221,11 +221,11 @@ x ≠ℕ y = ~ (x =ℕ y)
 _>_ : ℕ → ℕ → 𝔹
 x > y = (~ (x < y)) ∧ (x ≠ℕ y)
 
-<⇒> : ∀ (x y : ℕ) → (x > y) ≡ (y < x)
-<⇒> zero zero = refl
-<⇒> zero (suc y) = refl
-<⇒> (suc x) zero = refl
-<⇒> (suc x) (suc y) = <⇒> x y
+>⇒< : ∀ (x y : ℕ) → (x > y) ≡ tt → (y < x) ≡ tt
+>⇒< zero zero ()
+>⇒< zero (suc _) ()
+>⇒< (suc x) zero refl = refl
+>⇒< (suc x) (suc y) p = >⇒< x y p 
 
 _≤_ : ℕ → ℕ → 𝔹
 x ≤ y = (x < y) ∨ (x =ℕ y)
