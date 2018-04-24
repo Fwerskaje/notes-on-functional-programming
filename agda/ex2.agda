@@ -35,17 +35,24 @@ tt ∨ b = tt
 ff ∨ b = b
 
 _⊻_ : 𝔹 → 𝔹 → 𝔹
-tt ⊻ tt = tt
+tt ⊻ tt = ff
 ff ⊻ ff = tt
-tt ⊻ ff = ff
-ff ⊻ tt = ff
+tt ⊻ ff = tt
+ff ⊻ tt = tt
 
 ~_ : 𝔹 → 𝔹
 ~ tt = ff
 ~ ff = tt
 
+_impl_ : 𝔹 → 𝔹 → 𝔹
+x impl y = (~ x) ∨ y
+
 ~tt : (~ (~ tt)) ≡ tt
 ~tt = refl
+
+impl→tt : ∀ (b : 𝔹) → (b impl tt) ≡ tt
+impl→tt tt = refl
+impl→tt ff = refl
 
 ∧-commutative : ∀ (b c : 𝔹) -> (b ∧ c) ≡ (c ∧ b)
 ∧-commutative tt tt = refl

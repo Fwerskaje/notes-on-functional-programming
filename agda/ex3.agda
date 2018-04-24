@@ -1,7 +1,7 @@
 module ex3 where
 
 open import ex2
-open import level using (_⊔_)
+open import level -- using (_⊔_) lone
 
 _∘_ : {A : Set} {B : A → Set} {C : (x : A) → B x → Set}
       (f : {x : A}(y : B x) → C x y)
@@ -145,17 +145,59 @@ z-pos zero (suc y) () _
 z-pos (suc x) zero refl b = b 
 z-pos (suc x) (suc y) a b = z-pos x y a b
 
+rev-> : ∀ (x y : ℕ) → (y < x) ≡ tt → (x > y) ≡ tt
+rev-> zero zero ()
+rev-> zero (suc _) ()
+rev-> (suc x) zero refl = refl
+rev-> (suc x) (suc y) p rewrite rev-> x y p = refl
+
 _+ℤ_ : ℤ → ℤ → ℤ
-Mkℤ zero _      +ℤ y            = y
-Mkℤ n@(suc _) x +ℤ Mkℤ zero _   = Mkℤ n x
-Mkℤ n@(suc _) x +ℤ Mkℤ n₂@(suc _) x₁ with < compareℕ n n₂ , x ⊻ x₁ >
-… | < _  , ff > = Mkℤ (n + n₂) x
-Mkℤ n@(suc n′) x +ℤ Mkℤ n₂@(suc n′₂) x₁ | < Left a , tt > = Mkℤ n″ (z-pos n′ n′₂ a x)
+Mkℤ zero _        +ℤ y            = y
+Mkℤ n@(suc _)  x  +ℤ Mkℤ zero _   = Mkℤ n x
+Mkℤ n@(suc _)  x  +ℤ Mkℤ n₂@(suc _)   x₁ with < compareℕ n n₂ , x ⊻ x₁ >
+Mkℤ n@(suc _)  x  +ℤ Mkℤ n₂@(suc _)   _  | < _ , ff > = Mkℤ (n + n₂) x
+Mkℤ n@(suc n′) x  +ℤ Mkℤ n₂@(suc n′₂) x₁ | < Left   a , tt > = Mkℤ n″ (z-pos n′ n′₂ a x)
   where n″ = n - n₂ 「 x>y⇒x≥y n′ n′₂ a 」
-Mkℤ (suc _) _ +ℤ Mkℤ (suc _) _  | < Middle b , tt > = Mkℤ zero triv
-Mkℤ n@(suc n′) x +ℤ Mkℤ n₂@(suc n′₂) x₁ | < Right c , tt > = Mkℤ n″ {!!} --(z-pos n′ n′₂ a x)
-  where n″ = n₂ - n 「 x>y⇒x≥y n′₂ n′ {!!} 」
+Mkℤ n@(suc n′) x  +ℤ Mkℤ n₂@(suc n′₂) x₁ | < Right  c , tt > = Mkℤ n″ (z-pos n′₂ n′ (rev-> n′₂ n′ c) x₁)
+  where n″ = n₂ - n 「 x>y⇒x≥y n′₂ n′ (rev-> n′₂ n′ c) 」
+Mkℤ n@(suc n′) x  +ℤ Mkℤ n₂@(suc n′₂) x₁ | < Middle b , tt > = Mkℤ zero triv
 
--- c   : (n′ < n′₂) ≡ tt
+x₁ : ℤ
+x₁ = (Mkℤ 42 tt) +ℤ (Mkℤ 265 ff) 
 
--- (x y : ℕ) → (x > y) ≡ (y < x)
+_≤ℤ_ : ℤ → ℤ → 𝔹
+Mkℤ zero triv ≤ℤ Mkℤ zero triv = tt
+Mkℤ zero triv ≤ℤ Mkℤ (suc m) y = y   -- +N > 0 ⇒ tt; -N > 0 ⇒ ff
+Mkℤ (suc n) x ≤ℤ Mkℤ zero triv = ~ x -- +N < 0 ⇒ ff; -N < 0 ⇒ tt
+Mkℤ (suc n) tt ≤ℤ Mkℤ (suc m) tt = n ≤ m
+Mkℤ (suc n) ff ≤ℤ Mkℤ (suc m) ff = n ≥ m
+Mkℤ (suc _) tt ≤ℤ Mkℤ (suc _) ff = ff
+Mkℤ (suc _) ff ≤ℤ Mkℤ (suc _) tt = tt
+
+
+_≥ℤ_ : ℤ → ℤ → 𝔹
+_≥ℤ_ x y = y ≤ℤ x -- x ≥ y ⇒ y ≤ x
+
+_≠ℤ_ : ℤ → ℤ → 𝔹
+Mkℤ zero triv ≠ℤ Mkℤ zero triv = tt
+Mkℤ zero triv ≠ℤ Mkℤ (suc _) _ = ff
+Mkℤ (suc _) _ ≠ℤ Mkℤ zero triv = ff
+Mkℤ (suc n) x ≠ℤ Mkℤ (suc m) y = (~ (x ⊻ y)) ∧ (n ≠ℕ m)
+
+_<ℤ_ : ℤ → ℤ → 𝔹
+_<ℤ_ x y = (x ≤ℤ y) ∧ (x ≠ℤ y)
+
+_>ℤ_ : ℤ → ℤ → 𝔹
+_>ℤ_ x y = y <ℤ x
+
+{-
+Define some further operations on the type Z of Section 7.1,
+such as negation, subtraction, and multiplication.
+-}
+
+_×ℤ_ : ℤ → ℤ → ℤ
+Mkℤ zero triv ×ℤ Mkℤ zero triv = Mkℤ zero triv
+Mkℤ zero triv ×ℤ Mkℤ (suc _) _ = Mkℤ zero triv
+Mkℤ (suc _) _ ×ℤ Mkℤ zero triv = Mkℤ zero triv
+n@(Mkℤ (suc _) x) ×ℤ Mkℤ (suc zero) x₂ = ? -- Mkℤ ? ((~ (x ⊻ x₂)) ∧ (x ∧
+n@(Mkℤ (suc _) _) ×ℤ Mkℤ (suc (suc n₂)) x₂ = {!!}
