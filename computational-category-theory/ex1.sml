@@ -38,3 +38,5 @@ fun fib(0) = 0
 
 fun numprint(zero) = 0
   | numprint(succ n) = 1 + numprint(n) 
+
+				    
