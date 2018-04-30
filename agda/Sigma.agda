@@ -98,18 +98,6 @@ data _≈_ {A : Set} : Stream A → Stream A → Set where
 ≈-refl : {A : Set} {xs : Stream A} → xs ≈ xs
 ≈-refl {A} {x ∷ xs} = x ∷ ♯ ≈-refl
 
-_∧_ : Bool → Bool → Bool
-true ∧ b = b
-false ∧ b = false
 
-f : Bool → Bool → Bool
-f x y = x ∧ y
 
-g : Bool → Bool → Bool
-g x y = x ∧ y
 
-p : f ≡ g
-p = refl 
-
-q : f ≡ _∧_
-q = refl 

@@ -37,3 +37,4 @@ datatype ('o, 'a) Cat =
 
 datatype 'a Set_Arrow =
 	 set_arrow of ('a Set) * ('a -> 'a) * ('a Set)
+
