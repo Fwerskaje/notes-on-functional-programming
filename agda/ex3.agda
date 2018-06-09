@@ -1,7 +1,7 @@
 module ex3 where
 
 open import ex2
-open import level -- using (_⊔_) lone
+open import Level hiding (zero; suc) -- using (_⊔_) lone
 
 _∘_ : {A : Set} {B : A → Set} {C : (x : A) → B x → Set}
       (f : {x : A}(y : B x) → C x y)
@@ -18,7 +18,7 @@ fst < x , x₁ > = x
 snd : {α β : Set} → (α ×ₚ β) → β
 snd < x , x₁ > = x₁
 
-t₁ : ℕ ×ₚ ℕ
+t₁ : ℕ ×ₚ ℕ 
 t₁ = < zero , zero >
 
 the : (α : Set) → α → α
@@ -195,9 +195,24 @@ Define some further operations on the type Z of Section 7.1,
 such as negation, subtraction, and multiplication.
 -}
 
+-_ : ℤ → ℤ 
+- Mkℤ zero triv = Mkℤ zero triv
+- Mkℤ n@(suc _) x = Mkℤ n (~ x)
+
+{-
+a-plus-minus-a-≡0 : ∀ (a : ℤ) → (a +ℤ (- a)) ≡ (Mkℤ zero triv)
+a-plus-minus-a-≡0 (Mkℤ zero triv) = refl
+a-plus-minus-a-≡0 (Mkℤ (suc n) x) = {!!}
+  where prf : ∀ (n x : ℕ) →
+              (Mkℤ (suc n) x +ℤ Mkℤ (suc n) (~ x) | < compareℕ n n , x ⊻ (~ x) >)
+              ≡ Mkℤ 0 triv
+        prf = ?-}
+  
+
 _×ℤ_ : ℤ → ℤ → ℤ
 Mkℤ zero triv ×ℤ Mkℤ zero triv = Mkℤ zero triv
 Mkℤ zero triv ×ℤ Mkℤ (suc _) _ = Mkℤ zero triv
 Mkℤ (suc _) _ ×ℤ Mkℤ zero triv = Mkℤ zero triv
-n@(Mkℤ (suc _) x) ×ℤ Mkℤ (suc zero) x₂ = ? -- Mkℤ ? ((~ (x ⊻ x₂)) ∧ (x ∧
+n@(Mkℤ (suc _) x) ×ℤ Mkℤ (suc zero) x₂ = {!!} -- Mkℤ ? ((~ (x ⊻ x₂)) ∧ (x ∧
 n@(Mkℤ (suc _) _) ×ℤ Mkℤ (suc (suc n₂)) x₂ = {!!}
+

@@ -16,3 +16,4 @@ postulate
 main : IO Unit
 main = getLine >>= λ x →
        putStrLn (stringHello ++ x)
+

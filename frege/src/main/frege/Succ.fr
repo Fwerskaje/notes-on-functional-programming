@@ -1,7 +1,0 @@
-package Succ where
-
-scc :: Int -> Int
-scc = (+1)
-
-prd :: Int -> Int
-prd n = n - 1
