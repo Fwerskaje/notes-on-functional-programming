@@ -1,0 +1,5 @@
+module ex2 where
+
+import ex1
+
+sym (A : U) (a b : A) (p : Path A a b) : Path A b a = <i> p @ -i
