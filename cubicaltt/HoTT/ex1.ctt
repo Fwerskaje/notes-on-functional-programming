@@ -1,0 +1,19 @@
+module ex1 where
+
+id (A : U) (a : A) : A = a
+
+swap (A : U) (B : U) (C : U) (g : A -> B -> C)
+     : B -> A -> C = \(b : B) -> \(a : A) -> g a b
+
+data pair (A : U) (B : U) = pair (a : A) (b : B)
+
+pr1 (A B : U) : pair A B -> A = split { pair a _ -> a }
+
+pr2 (A B : U) : pair A B -> B = split { pair _ b -> b }
+
+rec (A B C : U) (g : A -> B -> C) : pair A B -> C = split
+    pair a b -> g a b
+
+pr1' (A B : U) (p : pair A B) : A =
+    rec A B A (\(a : A) -> \(b : B) -> a) p
+

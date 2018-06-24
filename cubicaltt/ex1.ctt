@@ -54,6 +54,6 @@ mutual
 
   odd : nat -> bool = split
     zero -> false
-    suc n -> even n
+    suc n -> even 
     
 evenodd (n : nat) : Path bool (even n) (odd (suc n)) = <i> (even n) 

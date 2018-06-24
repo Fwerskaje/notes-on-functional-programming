@@ -1,0 +1,15 @@
+module ex2 where
+
+import ex1
+
+data Sigma (A : U) (B : A -> U) = Sigma (a : A) (b : B a)
+
+pr1Sigma (A : U) (B : A -> U) : (p : Sigma A B) -> A = split
+	 Sigma a _ -> a
+
+pr2Sigma (A : U) (B : A -> U) : (p : Sigma A B) -> B (pr1Sigma A B p) = split
+	 Sigma _ b -> b
+
+depSigma (A : U) (B : A -> U) : (p : Sigma A B) -> U = ?
+
+g (A : U) (B : A -> U) : (a : A) -> (b : B a) -> depSigma A B (Sigma A B) = ?
