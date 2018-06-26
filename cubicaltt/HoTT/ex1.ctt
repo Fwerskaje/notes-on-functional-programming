@@ -17,3 +17,4 @@ rec (A B C : U) (g : A -> B -> C) : pair A B -> C = split
 pr1' (A B : U) (p : pair A B) : A =
     rec A B A (\(a : A) -> \(b : B) -> a) p
 
+

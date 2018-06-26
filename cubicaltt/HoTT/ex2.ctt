@@ -10,6 +10,41 @@ pr1Sigma (A : U) (B : A -> U) : (p : Sigma A B) -> A = split
 pr2Sigma (A : U) (B : A -> U) : (p : Sigma A B) -> B (pr1Sigma A B p) = split
 	 Sigma _ b -> b
 
-depSigma (A : U) (B : A -> U) : (p : Sigma A B) -> U = ?
+recSigma (A : U) (B : A -> U)
+	 (C : U) (g : (x : A) -> (B x) -> C)
+	 : Sigma A B -> C = split { Sigma a b -> g a b }
 
-g (A : U) (B : A -> U) : (a : A) -> (b : B a) -> depSigma A B (Sigma A B) = ?
+data Coproduct (A : U) (B : U) =
+       Right (a : A)
+     | Left  (b : B)	   
+
+recCoproduct (A B C : U) (f : A -> C) (g : B -> C)
+	     : Coproduct A B -> C = split
+	     	 Right a -> f a
+	     	 Left  b -> g b
+
+depCoproF (A B : U) (C : Coproduct A B -> U)
+	  (g0 : (a : A) -> C (Right a))
+	  (g1 : (b : B) -> C (Left  b))
+	  : (x : Coproduct A B) -> C x = split
+	    Right a -> g0 a
+	    Left  b -> g1 b
+
+data Void =
+
+voidFunction (A : U) : Void -> A = split {}
+
+indVoid (C : Void -> U) (z : Void) : C z = undefined
+
+data Bool = False | True
+
+recBool (C : U) (e0 : C) (e1 : C) : Bool -> C = split
+	False -> e1
+	True -> e0
+
+
+indBool (C : Bool -> U) (c0 : C True) (c1 : C False)
+	: (x : Bool) -> C x = split
+	False -> c1
+	True -> c0
+
