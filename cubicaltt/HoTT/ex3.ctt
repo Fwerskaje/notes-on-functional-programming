@@ -1,0 +1,40 @@
+module ex3 where
+
+import ex2
+
+data Nat = z | suc (n : Nat)
+
+f (C : U) (c0 : C) (c1 : Nat -> C -> C)
+  : Nat -> C = split
+    z -> c0
+    suc n -> c1 n (f C c0 c1 n)
+
+double : Nat -> Nat = split
+       z -> z
+       suc n -> suc (suc (double n))
+
+{-
+add : Nat -> Nat -> Nat = split
+      z n -> n
+      suc z n -> ?
+
+CallStack (from HasCallStack):
+  error, called at ./Eval.hs:36:43 in main:Eval
+-}
+
+recNat (C : U) (c0 : C) (c1 : Nat -> C -> C) : Nat -> C = split
+       z -> c0
+       suc n -> c1 n (recNat C c0 c1 n)
+
+plus (n : Nat) (m : Nat) : Nat =
+     recNat Nat m (\(_ x : Nat) -> suc x) n
+
+product : Nat -> Nat -> Nat = split
+	z -> \(_ : Nat) -> z
+	suc n -> \(m : Nat) -> recNat Nat m (\(_ x : Nat) -> plus m x) n
+
+indNat (C : Nat -> U) (c0 : C z)
+       (f : (x : Nat) -> C x -> C (suc x))
+       : (n : Nat) -> C n = split
+       	 z -> c0
+	 suc m -> f m (indNat C c0 f m)

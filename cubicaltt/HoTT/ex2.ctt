@@ -2,49 +2,67 @@ module ex2 where
 
 import ex1
 
-data Sigma (A : U) (B : A -> U) = Sigma (a : A) (b : B a)
+data Sigma (A : U) (B : A -> U) = sigma (a : A) (b : B a)
 
 pr1Sigma (A : U) (B : A -> U) : (p : Sigma A B) -> A = split
-	 Sigma a _ -> a
+	 sigma a _ -> a
 
 pr2Sigma (A : U) (B : A -> U) : (p : Sigma A B) -> B (pr1Sigma A B p) = split
-	 Sigma _ b -> b
+	 sigma _ b -> b
 
 recSigma (A : U) (B : A -> U)
 	 (C : U) (g : (x : A) -> (B x) -> C)
-	 : Sigma A B -> C = split { Sigma a b -> g a b }
+	 : Sigma A B -> C = split { sigma a b -> g a b }
 
 data Coproduct (A : U) (B : U) =
-       Right (a : A)
-     | Left  (b : B)	   
+       right (a : A)
+     | left  (b : B)	   
 
 recCoproduct (A B C : U) (f : A -> C) (g : B -> C)
 	     : Coproduct A B -> C = split
-	     	 Right a -> f a
-	     	 Left  b -> g b
+	     	 right a -> f a
+	     	 left  b -> g b
 
 depCoproF (A B : U) (C : Coproduct A B -> U)
-	  (g0 : (a : A) -> C (Right a))
-	  (g1 : (b : B) -> C (Left  b))
+	  (g0 : (a : A) -> C (right a))
+	  (g1 : (b : B) -> C (left  b))
 	  : (x : Coproduct A B) -> C x = split
-	    Right a -> g0 a
-	    Left  b -> g1 b
+	    right a -> g0 a
+	    left  b -> g1 b
 
 data Void =
+data Unit = unit
 
 voidFunction (A : U) : Void -> A = split {}
 
 indVoid (C : Void -> U) (z : Void) : C z = undefined
 
-data Bool = False | True
+data Bool = false | true
 
 recBool (C : U) (e0 : C) (e1 : C) : Bool -> C = split
-	False -> e1
-	True -> e0
+	false -> e1
+	true -> e0
 
-
-indBool (C : Bool -> U) (c0 : C True) (c1 : C False)
+indBool (C : Bool -> U) (c0 : C true) (c1 : C false)
 	: (x : Bool) -> C x = split
-	False -> c1
-	True -> c0
+	false -> c1
+	true -> c0
+
+{-
+
+indProp : (x : Bool) -> Either (x = True) (x = False)
+indProp False = Right Refl
+indProp True = Left Refl
+
+CoproductFromSigma : (A : Type) -> (B : Type) -> (x : Bool) -> Type 
+CoproductFromSigma a b x = (x ** if x then a else b)
+
+-}
+
+CoproductFromSigma (A B : U) : U = Sigma Bool (recBool U A B)
+
+CoproductFromPi (A B : U) (x : Bool) : U = recBool U A B x
+
+exCoproduct_I : CoproductFromSigma Unit Void = sigma true unit
+exCoproduct_II : CoproductFromPi Unit Void true = unit
 

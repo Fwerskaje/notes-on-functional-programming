@@ -4,5 +4,12 @@ indProp : (x : Bool) -> Either (x = True) (x = False)
 indProp False = Right Refl
 indProp True = Left Refl
 
-data N1 = Z1 | S1 N1
-data N2 = Z2 | S2 N2
+{-
+CoproductFromSigma (A B : U) : U = Sigma Bool (recBool U A B)
+
+exCoproduct : CoproductFromSigma Unit Unit = Sigma Bool ?
+-}
+
+CoproductFromSigma : (A : Type) -> (B : Type) -> (x : Bool) -> Type 
+CoproductFromSigma a b x = (x ** if x then a else b)
+
