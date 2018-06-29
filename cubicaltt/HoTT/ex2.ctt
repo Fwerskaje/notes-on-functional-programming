@@ -35,6 +35,8 @@ data Unit = unit
 
 voidFunction (A : U) : Void -> A = split {}
 
+not (A : U) : U = A -> Void
+
 indVoid (C : Void -> U) (z : Void) : C z = undefined
 
 data Bool = false | true

@@ -38,3 +38,10 @@ indNat (C : Nat -> U) (c0 : C z)
        : (n : Nat) -> C n = split
        	 z -> c0
 	 suc m -> f m (indNat C c0 f m)
+
+prop_1 (A B : U) : Pair (not A) (not B) -> not (Coproduct A B) = split
+  pair a b -> split@(Coproduct A B -> Void) with
+       right x -> a x
+       left  y -> b y
+
+
